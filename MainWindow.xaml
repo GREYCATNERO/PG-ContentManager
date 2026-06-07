@@ -1,0 +1,548 @@
+﻿<Window x:Class="AnimeTagsEditor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="🎌 Anime Tags Editor — P/G Studio" Height="850" Width="1300"
+        WindowStartupLocation="CenterScreen"
+        Background="#0f0f0f" Foreground="#E0E0E0">
+
+    <Window.Resources>
+
+        <!-- 🔸 Цветовая палитра -->
+        <SolidColorBrush x:Key="AccentYellow" Color="#F1C40F"/>
+        <SolidColorBrush x:Key="CardBg" Color="#1E1E1E"/>
+        <SolidColorBrush x:Key="CardBorder" Color="#333333"/>
+        <SolidColorBrush x:Key="TextMuted" Color="#AAAAAA"/>
+        <Color x:Key="ShadowColor">#000000</Color>
+
+        <!-- 🔸 Эффект тени для карточек -->
+        <DropShadowEffect x:Key="CardShadow" 
+                          Color="{StaticResource ShadowColor}" 
+                          BlurRadius="15" 
+                          ShadowDepth="3" 
+                          Opacity="0.4"/>
+
+        <!-- 1. ВКЛАДКИ -->
+        <Style TargetType="TabControl">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
+        <Style TargetType="TabItem">
+            <Setter Property="Background" Value="#2D2D2D"/>
+            <Setter Property="Foreground" Value="#AAAAAA"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="18,10"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border Name="Border" 
+                                BorderThickness="0,0,0,2" 
+                                BorderBrush="Transparent"
+                                Background="Transparent"
+                                Margin="0,0,4,0" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter x:Name="ContentSite" 
+                                              VerticalAlignment="Center" 
+                                              HorizontalAlignment="Center" 
+                                              ContentSource="Header"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource AccentYellow}"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 2. ДЕРЕВО -->
+        <Style TargetType="TreeView">
+            <Setter Property="Background" Value="{StaticResource CardBg}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorder}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style TargetType="TreeViewItem">
+            <Setter Property="Foreground" Value="#E0E0E0"/>
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TreeViewItem">
+                        <StackPanel>
+                            <Border Name="Border" Padding="{TemplateBinding Padding}" Margin="0,0,0,2" 
+                                    Background="Transparent" CornerRadius="4">
+                                <ContentPresenter x:Name="Content" ContentSource="Header"/>
+                            </Border>
+                            <ItemsPresenter x:Name="ItemsHost"/>
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource AccentYellow}"/>
+                                <Setter Property="Foreground" Value="#000000"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#333333"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 3. COMBOBOX -->
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="#2D2D2D"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#444444"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Margin" Value="0,5,0,10"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton Name="ToggleButton" 
+                                        Background="#2D2D2D"
+                                        BorderBrush="#444444"
+                                        BorderThickness="1"
+                                        Focusable="false"
+                                        IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                        ClickMode="Press">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border Background="{TemplateBinding Background}" 
+                                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="4">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition/>
+                                                    <ColumnDefinition Width="25"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ContentPresenter Content="{TemplateBinding Content}" 
+                                                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                                Margin="10,3,0,3"
+                                                                VerticalAlignment="Center"
+                                                                HorizontalAlignment="Left"
+                                                                TextBlock.Foreground="White"/>
+                                                <Path Grid.Column="1" 
+                                                      Fill="White"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"
+                                                      Data="M 0 0 L 4 4 L 8 0 Z"/>
+                                            </Grid>
+                                        </Border>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <Popup Name="Popup"
+                                   Placement="Bottom"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True" 
+                                   Focusable="False"
+                                   PopupAnimation="Slide">
+                                <Grid Name="DropDown"
+                                      SnapsToDevicePixels="True"
+                                      MinWidth="{TemplateBinding ActualWidth}"
+                                      MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border x:Name="DropDownBorder" 
+                                            Background="#1E1E1E"
+                                            BorderBrush="#444444"
+                                            BorderThickness="1"
+                                            CornerRadius="4"/>
+                                    <ScrollViewer Margin="4,6,4,6" 
+                                                 SnapsToDevicePixels="True"
+                                                 Background="#1E1E1E">
+                                        <StackPanel IsItemsHost="True" 
+                                                   KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для ComboBoxItem -->
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border Name="Border" 
+                                Padding="{TemplateBinding Padding}" 
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="3"
+                                Margin="2,1">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource AccentYellow}"/>
+                                <Setter Property="Foreground" Value="#000000"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#333333"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 4. LISTBOX -->
+        <Style TargetType="ListBox">
+            <Setter Property="Background" Value="{StaticResource CardBg}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style TargetType="ListBoxItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#E0E0E0"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border Name="Border" Padding="{TemplateBinding Padding}" 
+                                Background="{TemplateBinding Background}" CornerRadius="4" Margin="2,1">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{StaticResource AccentYellow}"/>
+                                <Setter Property="Foreground" Value="#000000"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#333333"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 5. TEXTBOX -->
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#252525"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#444444"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="Margin" Value="0,2,0,8"/>
+            <Setter Property="CaretBrush" Value="White"/>
+        </Style>
+
+        <!-- 6. BUTTON -->
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="#007ACC"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,9"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Name="Border" 
+                                Background="{TemplateBinding Background}" 
+                                CornerRadius="5" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#1E90FF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#005A9E"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 7. GROUPBOX -->
+        <Style TargetType="GroupBox">
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorder}"/>
+            <Setter Property="Foreground" Value="#E0E0E0"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="Effect" Value="{StaticResource CardShadow}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GroupBox">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Border Grid.Row="0" 
+                                    BorderBrush="{TemplateBinding BorderBrush}" 
+                                    BorderThickness="1,1,1,0" 
+                                    CornerRadius="6,6,0,0" 
+                                    Background="#1A1A1A" 
+                                    Padding="12,8,12,8">
+                                <TextBlock Foreground="{StaticResource AccentYellow}" 
+                                           FontWeight="Bold" 
+                                           FontSize="13"
+                                           Text="{TemplateBinding Header}"/>
+                            </Border>
+                            <Border Grid.Row="1" 
+                                    BorderBrush="{TemplateBinding BorderBrush}" 
+                                    BorderThickness="1,0,1,1" 
+                                    CornerRadius="0,0,6,6" 
+                                    Background="{StaticResource CardBg}">
+                                <ContentPresenter Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 8. ГЛАВНЫЕ КНОПКИ -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="Margin" Value="5,0,0,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Effect" Value="{StaticResource CardShadow}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Name="Border" 
+                                Background="{TemplateBinding Background}" 
+                                CornerRadius="6" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 9. СКРОЛЛБАРЫ -->
+        <Style TargetType="ScrollBar">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Width" Value="8"/>
+        </Style>
+
+    </Window.Resources>
+
+    <!-- 🏗️ ОСНОВНАЯ РАЗМЕТКА -->
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 🔸 Верхняя панель -->
+        <Border Grid.Row="0" 
+                Background="#1A1A1A" 
+                CornerRadius="8" 
+                Padding="20,12" 
+                Margin="0,0,0,15"
+                BorderBrush="#333333"
+                BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="36" Height="36" 
+                            CornerRadius="18" 
+                            Background="#F1C40F"
+                            Margin="0,0,12,0">
+                        <TextBlock Text="🎌" 
+                                   FontSize="18"
+                                   HorizontalAlignment="Center" 
+                                   VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Anime Tags Editor" 
+                                   FontSize="16" 
+                                   FontWeight="Bold" 
+                                   Foreground="White"/>
+                        <TextBlock Text="P/G Studio • Редактор википедии тегов" 
+                                   FontSize="11" 
+                                   Foreground="#888888"
+                                   Margin="0,2,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" 
+                            Orientation="Horizontal" 
+                            VerticalAlignment="Center">
+                    <TextBlock Text="📂 " FontSize="14" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="CurrentFileName" 
+                               Text="Файл не загружен" 
+                               Foreground="#888888" 
+                               FontSize="12"
+                               VerticalAlignment="Center"
+                               Margin="5,0,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- 🔸 Вкладки -->
+        <TabControl x:Name="MainTabControl" 
+                    Grid.Row="1" 
+                    Background="Transparent" 
+                    BorderThickness="0"
+                    SelectionChanged="MainTabControl_SelectionChanged">
+
+            <!-- Вкладка 1: Просмотр -->
+            <TabItem Header="📖 Просмотр">
+                <Grid Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <GroupBox Header=" Категории и теги" Grid.Column="0">
+                        <TreeView x:Name="TagsTree" BorderThickness="0" SelectedItemChanged="TagsTree_SelectedItemChanged"/>
+                    </GroupBox>
+                    <GroupBox Header="ℹ️ Информация о теге" Grid.Column="1" Margin="10,0,0,0">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel x:Name="PreviewPanel" Margin="10"/>
+                        </ScrollViewer>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+
+            <!-- Вкладка 2: Редактирование -->
+            <TabItem Header="️✎Редактирование">
+                <Grid Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="300"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <GroupBox Header="⚙️ Управление">
+                        <StackPanel Margin="5">
+                            <TextBlock Text=" Категория:" Foreground="{StaticResource TextMuted}" Margin="0,0,0,5" FontSize="12"/>
+                            <ComboBox x:Name="CategoryCombo" SelectionChanged="CategoryCombo_SelectionChanged" Height="32"/>
+                            <Button Content=" Создать категорию" Click="AddCategory_Click" Background="#9C27B0" Foreground="White" Width="250"/>
+                            <Button Content="🗑️ Удалить категорию" Click="DeleteCategory_Click" Background="#E74C3C" Foreground="White" Margin="0,5,0,10"/>
+                            <TextBlock Text="📋 Список тегов:" Foreground="{StaticResource TextMuted}" Margin="0,10,0,5" FontSize="12"/>
+                            <ListBox x:Name="TagsList" Height="350" SelectionChanged="TagsList_SelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
+                            <Button Content="➕ Добавить тег" Click="AddTag_Click" Background="#4CAF50" Foreground="White" Margin="0,10,0,5"/>
+                            <Button Content="🗑️ Удалить выбранный" Click="DeleteTag_Click" Background="#F44336" Foreground="White"/>
+                        </StackPanel>
+                    </GroupBox>
+                    <GroupBox Header="📝 Поля тега" Grid.Column="1" Margin="10,0,0,0">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel x:Name="EditForm" Margin="10"/>
+                        </ScrollViewer>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+
+            <!-- Вкладка 3: Связаться -->
+            <TabItem Header="📬 Связаться">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,10,0,0">
+                    <StackPanel Margin="20" MaxWidth="800">
+                        <TextBlock Text="📧 Связь с разработчиком" FontSize="28" FontWeight="Bold" Foreground="#F1C40F" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                        <TextBlock Text="Если вы нашли новые категории, хотите поделиться данными или помочь проекту — используйте удобный способ связи ниже" 
+                                   FontSize="14" Foreground="#AAAAAA" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,30"/>
+                        <Border Background="#1E1E1E" BorderBrush="#333333" BorderThickness="1" CornerRadius="10" Padding="20" Margin="0,0,0,20" Effect="{StaticResource CardShadow}">
+                            <StackPanel>
+                                <TextBlock Text="📋 Как отправить данные:" FontSize="18" FontWeight="Bold" Foreground="#F1C40F" Margin="0,0,0,10"/>
+                                <TextBlock TextWrapping="Wrap" Foreground="#E0E0E0" FontSize="14" LineHeight="24">
+                                    <Run Text="1. "/><Run Text="Отредактируйте или создайте JSON файл в этом редакторе" Foreground="#AAAAAA"/><LineBreak/>
+                                    <Run Text="2. "/><Run Text="Отправьте файл на почту " Foreground="#AAAAAA"/><Run Text="wiki@playgame-studio.ru" Foreground="#F1C40F" FontWeight="Bold"/><LineBreak/>
+                                    <Run Text="3. "/><Run Text="После отправки напишите " Foreground="#AAAAAA"/><Run Text="&quot;GCN&quot;" Foreground="#2ECC71" FontWeight="Bold"/><Run Text=" в Discord или Telegram" Foreground="#AAAAAA"/><LineBreak/>
+                                    <Run Text="4. "/><Run Text="Я проверю данные и добавлю их в общую базу!" Foreground="#AAAAAA"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                        <TextBlock Text="💬 Способы связи" FontSize="20" FontWeight="Bold" Foreground="White" Margin="0,20,0,15"/>
+                        <StackPanel x:Name="ContactCardsPanel" Margin="0,0,0,20"/>
+                        <Border Background="#1E1E1E" BorderBrush="#2ECC71" BorderThickness="1" CornerRadius="10" Padding="20" Margin="0,10,0,0" Effect="{StaticResource CardShadow}">
+                            <StackPanel>
+                                <TextBlock Text="🔓 Открытый исходный код" FontSize="18" FontWeight="Bold" Foreground="#2ECC71" Margin="0,0,0,8"/>
+                                <TextBlock TextWrapping="Wrap" Foreground="#AAAAAA" FontSize="13">
+                                    Приложение распространяется с открытым исходным кодом. Вы можете скачать его, модифицировать и распространять дальше. Также доступен готовый .exe файл для установки без Visual Studio.
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Вкладка 4: Предпросмотр сайта -->
+            <TabItem Header="👁️ Предпросмотр сайта">
+                <Grid Margin="0,10,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Margin="20,20,20,10">
+                        <TextBlock Text="📖 Википедия тегов" FontSize="32" FontWeight="Bold" Foreground="#F1C40F" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Подробный справочник всех жанров и тем." FontSize="14" Foreground="#AAAAAA" HorizontalAlignment="Center" Margin="0,5,0,20"/>
+                        <Grid Margin="0,0,0,15">
+                            <TextBox x:Name="PreviewSearchBox" TextChanged="PreviewSearchBox_TextChanged" Background="#1A1A1A" Foreground="White" BorderBrush="#333" Padding="12,10"/>
+                            <TextBlock Text="🔍 Поиск тега..." Foreground="#666" Margin="14,10,0,0" IsHitTestVisible="False"/>
+                        </Grid>
+                        <WrapPanel x:Name="CategoryFiltersPanel" Margin="0,0,0,10"/>
+                    </StackPanel>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel x:Name="PreviewTagsPanel" Margin="20,0,20,20"/>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- 🔸 Нижние кнопки (только одна панель!) -->
+        <Border x:Name="BottomButtonsPanel"
+                Grid.Row="1" 
+                VerticalAlignment="Bottom" 
+                HorizontalAlignment="Right" 
+                Margin="0,0,15,15"
+                Background="#1A1A1A"
+                CornerRadius="8"
+                Padding="10"
+                BorderBrush="#333333"
+                BorderThickness="1"
+                Effect="{StaticResource CardShadow}">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="📄 Создать новый" 
+                        Click="CreateNew_Click" 
+                        Background="#9C27B0" 
+                        Style="{StaticResource PrimaryButton}"/>
+                <Button Content="📂 Открыть JSON" 
+                        Click="OpenJson_Click" 
+                        Background="#2196F3" 
+                        Style="{StaticResource PrimaryButton}"/>
+                <Button Content="💾 Сохранить JSON" 
+                        Click="SaveJson_Click" 
+                        Background="#4CAF50" 
+                        Style="{StaticResource PrimaryButton}"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

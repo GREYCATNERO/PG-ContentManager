@@ -67,12 +67,80 @@ namespace AnimeTagsEditor
         private string _previewSearchQuery = "";
         private string _previewSelectedCategory = "all";
 
+        // ✅ ИСПРАВЛЕННЫЙ конструктор БЕЗ параметров
         public MainWindow()
         {
             InitializeComponent();
             InitializeCategoryCombo();
             InitializeContactCards();
+
+            // Создаём пустую структуру данных
+            _data = new TagsData
+            {
+                MainGenres = new List<Tag>(),
+                Demographics = new List<Tag>(),
+                IsekaiFantasy = new List<Tag>(),
+                SciFiTech = new List<Tag>(),
+                SchoolLife = new List<Tag>(),
+                MilitaryWar = new List<Tag>(),
+                MusicArts = new List<Tag>(),
+                RelationshipsRomance = new List<Tag>(),
+                CharacterArchetypes = new List<Tag>(),
+                PlotStructures = new List<Tag>(),
+                ToneMood = new List<Tag>(),
+                ContentWarnings = new List<Tag>(),
+                NicheAesthetics = new List<Tag>(),
+                ProductionFormat = new List<Tag>(),
+                HistoricalPeriods = new List<Tag>(),
+                PowerSystems = new List<Tag>()
+            };
+
+            PopulateUI();
         }
+
+        // ✅ НОВЫЙ конструктор С параметром (для открытия файла)
+        public MainWindow(string filePath) : this()
+        {
+            if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
+            {
+                try
+                {
+                    _currentFilePath = filePath;
+                    var json = File.ReadAllText(filePath);
+                    _data = JsonSerializer.Deserialize<TagsData>(json);
+
+                    if (CurrentFileName != null)
+                        CurrentFileName.Text = Path.GetFileName(filePath);
+
+                    RenderPreviewTags();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка загрузки файла: {ex.Message}",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        #region 🔴 НОВАЯ ФУНКЦИЯ: Выход в меню
+
+        private void ExitToMenu_Click(object sender, RoutedEventArgs e)
+        {
+            var result = MessageBox.Show(
+                "Выйти в главное меню?\n\nНесохранённые изменения будут потеряны!",
+                "Подтверждение",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                var welcomeWindow = new WelcomeWindow();
+                welcomeWindow.Show();
+                Close();
+            }
+        }
+
+        #endregion
 
         #region Вкладки 1 и 2: Просмотр и Редактирование
 
@@ -489,7 +557,6 @@ namespace AnimeTagsEditor
             if (string.IsNullOrEmpty(selectedKey))
                 selectedKey = selectedText;
 
-            // Проверяем что это пользовательская категория
             if (_categoryMap.ContainsKey(selectedKey))
             {
                 MessageBox.Show("Нельзя удалить стандартную категорию!\n\nМожно удалять только те категории, которые вы создали сами.",
@@ -497,7 +564,6 @@ namespace AnimeTagsEditor
                 return;
             }
 
-            // Проверяем есть ли теги в категории
             if (_customCategories.TryGetValue(selectedKey, out var categoryTags) && categoryTags.Count > 0)
             {
                 var result = MessageBox.Show(
@@ -512,14 +578,11 @@ namespace AnimeTagsEditor
                 if (result != MessageBoxResult.Yes) return;
             }
 
-            // Удаляем категорию
             _customCategories.Remove(selectedKey);
 
-            // Очищаем ComboBox и обновляем
             CategoryCombo.Items.Clear();
             InitializeCategoryCombo();
 
-            // Очищаем список тегов и форму
             TagsList.Items.Clear();
             EditForm.Children.Clear();
             _selectedCategory = null;
@@ -682,7 +745,6 @@ namespace AnimeTagsEditor
                     GetCategoryDisplayName(category), category));
             }
 
-            // Добавляем пользовательские категории
             foreach (var category in _customCategories.Keys)
             {
                 CategoryFiltersPanel.Children.Add(CreateCategoryFilterButton(
